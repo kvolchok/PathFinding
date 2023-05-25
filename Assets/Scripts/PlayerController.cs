@@ -13,7 +13,6 @@ public class PlayerController : MonoBehaviour
     private float _speed;
     
     private Animator _animator;
-    private Vector3 _startPoint;
 
     private void Awake()
     {
@@ -22,34 +21,34 @@ public class PlayerController : MonoBehaviour
 
     public void Move(Stack<Vector3> route)
     {
-        _startPoint = route.Pop();
         StartCoroutine(MoveCoroutine(route));
     }
 
     private IEnumerator MoveCoroutine(Stack<Vector3> route)
     {
         _animator.SetBool(IsMoving, true);
+        route.Pop();
         
         while (route.Count > 0)
         {
             var nextPoint = route.Pop();
             
-            var travelDistance = Vector3.Distance(_startPoint, nextPoint);
-            var travelTime = travelDistance / _speed;
-            var currentTime = 0f;
+            var distanceToNextPoint = Vector3.Distance(transform.position, nextPoint);
+            transform.LookAt(nextPoint);
+            var travelDistance = 0f;
 
-            while (currentTime < travelTime)
+            while (travelDistance <= distanceToNextPoint)
             {
-                var progress = currentTime / travelTime;
-                var currentPoint = Vector3.Lerp(_startPoint, nextPoint, progress);
-                transform.LookAt(currentPoint);
+                travelDistance = _speed * Time.deltaTime;
+                var currentPoint = Vector3.MoveTowards(transform.position, nextPoint, travelDistance);
                 transform.position = currentPoint;
-                currentTime += Time.deltaTime;
+                distanceToNextPoint -= travelDistance;
 
                 yield return null;
             }
 
-            _startPoint = nextPoint;
+            transform.position = nextPoint;
+            yield return null;
         }
         
         _animator.SetBool(IsMoving, false);
