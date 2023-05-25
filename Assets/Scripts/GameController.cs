@@ -20,10 +20,9 @@ public class GameController : MonoBehaviour
     private float _maxRayDistance = 100f;
     
     private Tile[,] _tiles;
-    private int[,] _tileMap;
+    private int[,] _possibleRoutes;
     private Queue<Vector2Int> _points;
     private Stack<Vector3> _shortestRoute;
-    private Vector2Int _mapsIndexDifference;
     private Camera _camera;
     
     private PlayerController _player;
@@ -36,22 +35,47 @@ public class GameController : MonoBehaviour
     private void Awake()
     {
         _tiles = new Tile[_map.Size.x, _map.Size.y];
-        _tileMap = new int[_map.Size.x + 2, _map.Size.y + 2];
+        _possibleRoutes = new int[_map.Size.x, _map.Size.y];
         _points = new Queue<Vector2Int>();
         _shortestRoute = new Stack<Vector3>();
-        _mapsIndexDifference = new Vector2Int(1, 1);
         _tileHeight = _tilePrefab.localScale.y * 2 + 0.1f;
         _camera = Camera.main;
     }
 
     private void Start()
     {
-        for (var x = 0; x < _tileMap.GetLength(0); x++)
+        for (var x = 0; x < _possibleRoutes.GetLength(0); x++)
         {
-            for (var y = 0; y < _tileMap.GetLength(1); y++)
+            for (var y = 0; y < _possibleRoutes.GetLength(1); y++)
             {
-                _tileMap[x, y] = -1;
+                _possibleRoutes[x, y] = -1;
             }
+        }
+    }
+    
+    private void Update()
+    {
+        if (!_isPlayerReadyToGo)
+        {
+            return;
+        }
+        
+        var mousePosition = Input.mousePosition;
+        var ray = _camera.ScreenPointToRay(mousePosition);
+
+        if (!Physics.Raycast(ray, out var hitInfo, _maxRayDistance, _layer))
+        {
+            return;
+        }
+        
+        var currentTileIndex = _mapIndexProvider.GetIndex(hitInfo.point);
+        HighlightTile(currentTileIndex);
+
+        if (Input.GetMouseButtonDown(0) && IsTileAvailable(currentTileIndex))
+        {
+            FindShortestRoute(currentTileIndex);
+            _player.Move(_shortestRoute);
+            _isPlayerReadyToGo = false;
         }
     }
 
@@ -67,17 +91,13 @@ public class GameController : MonoBehaviour
     {
         _tiles = _map.GetTiles();
 
-        for (var x = 0; x < _tileMap.GetLength(0) - 2; x++)
+        for (var x = 0; x < _possibleRoutes.GetLength(0); x++)
         {
-            for (var y = 0; y < _tileMap.GetLength(1) - 2; y++)
+            for (var y = 0; y < _possibleRoutes.GetLength(1); y++)
             {
-                if (_tiles[x, y].IsObstacle)
+                if (!_tiles[x, y].IsObstacle)
                 {
-                    _tileMap[x + 1, y + 1] = -1;
-                }
-                else
-                {
-                    _tileMap[x + 1, y + 1] = 0;
+                    _possibleRoutes[x, y] = 0;
                 }
             }
         }
@@ -87,16 +107,16 @@ public class GameController : MonoBehaviour
     {
         while (true)
         {
-            var x = Random.Range(1, _tileMap.GetLength(0) - 1);
-            var y = Random.Range(1, _tileMap.GetLength(1) - 1);
+            var x = Random.Range(0, _possibleRoutes.GetLength(0));
+            var y = Random.Range(0, _possibleRoutes.GetLength(1));
             var randomIndex = new Vector2Int(x, y);
 
-            if (_tileMap[x, y] == -1)
+            if (_possibleRoutes[x, y] == -1)
             {
                 continue;
             }
             
-            var playerSetPosition = _mapIndexProvider.GetTilePosition(randomIndex - _mapsIndexDifference);
+            var playerSetPosition = _mapIndexProvider.GetTilePosition(randomIndex);
             playerSetPosition.y += _tileHeight;
                 
             var player = Instantiate(_playerPrefab);
@@ -116,9 +136,8 @@ public class GameController : MonoBehaviour
     private void FindPossibleRoutes()
     {
         var playerPosition = _player.transform.localPosition;
-        playerPosition.y = 0;
-        var currentIndex = _mapIndexProvider.GetIndex(playerPosition) + _mapsIndexDifference;
-        _tileMap[currentIndex.x, currentIndex.y] = -10;
+        var currentIndex = _mapIndexProvider.GetIndex(playerPosition);
+        _possibleRoutes[currentIndex.x, currentIndex.y] = -10;
         _points.Enqueue(currentIndex);
 
         var end = 1;
@@ -133,32 +152,45 @@ public class GameController : MonoBehaviour
                 var x = currentPoint.x;
                 var y = currentPoint.y;
 
-                if (_tileMap[x, y + 1] == 0)
+                if (x < _possibleRoutes.GetLength(0) - 1)
                 {
-                    _tileMap[x, y + 1] = step;
-                    _points.Enqueue(new Vector2Int(x, y + 1));
-                    counter++;
+                    if (_possibleRoutes[x + 1, y] == 0)
+                    {
+                        _possibleRoutes[x + 1, y] = step;
+                        _points.Enqueue(new Vector2Int(x + 1, y));
+                        counter++;
+                    }
+                }
+
+                if (x > 0)
+                {
+                    if (_possibleRoutes[x - 1, y] == 0)
+                    {
+                        _possibleRoutes[x - 1, y] = step;
+                        _points.Enqueue(new Vector2Int(x - 1, y));
+                        counter++;
+                    }
                 }
                 
-                if (_tileMap[x, y - 1] == 0)
+                if (y < _possibleRoutes.GetLength(1) - 1)
                 {
-                    _tileMap[x, y - 1] = step;
-                    _points.Enqueue(new Vector2Int(x, y - 1));
-                    counter++;
+                    if (_possibleRoutes[x, y + 1] == 0)
+                    {
+                        _possibleRoutes[x, y + 1] = step;
+                        _points.Enqueue(new Vector2Int(x, y + 1));
+                        counter++;
+                    }
+                    
                 }
-                
-                if (_tileMap[x + 1, y] == 0)
+
+                if (y > 0)
                 {
-                    _tileMap[x + 1, y] = step;
-                    _points.Enqueue(new Vector2Int(x + 1, y));
-                    counter++;
-                }
-                
-                if (_tileMap[x - 1, y] == 0)
-                {
-                    _tileMap[x - 1, y] = step;
-                    _points.Enqueue(new Vector2Int(x - 1, y));
-                    counter++;
+                    if (_possibleRoutes[x, y - 1] == 0)
+                    {
+                        _possibleRoutes[x, y - 1] = step;
+                        _points.Enqueue(new Vector2Int(x, y - 1));
+                        counter++;
+                    }
                 }
             }
 
@@ -173,37 +205,9 @@ public class GameController : MonoBehaviour
         }
     }
 
-    private void Update()
-    {
-        if (!_isPlayerReadyToGo)
-        {
-            return;
-        }
-        
-        var mousePosition = Input.mousePosition;
-        var ray = _camera.ScreenPointToRay(mousePosition);
-
-        if (!Physics.Raycast(ray, out var hitInfo, _maxRayDistance, _layer))
-        {
-            return;
-        }
-        
-        var currentTileIndex = _mapIndexProvider.GetIndex(hitInfo.point);
-        HighlightTile(currentTileIndex);
-        currentTileIndex += _mapsIndexDifference;
-
-        if (Input.GetMouseButtonDown(0) && IsTileAvailable(currentTileIndex))
-        {
-            FindShortestRoute(currentTileIndex);
-            _player.Move(_shortestRoute);
-            _isPlayerReadyToGo = false;
-        }
-    }
-
     private void HighlightTile(Vector2Int currentTileIndex)
     {
         _currentTile = _tiles[currentTileIndex.x, currentTileIndex.y];
-        currentTileIndex += _mapsIndexDifference;
 
         if (_lastHighlightedTile != null)
         {
@@ -228,61 +232,80 @@ public class GameController : MonoBehaviour
 
     private bool IsTileAvailable(Vector2Int currentTileIndex)
     {
-        return _tileMap[currentTileIndex.x, currentTileIndex.y] > 0;
+        return _possibleRoutes[currentTileIndex.x, currentTileIndex.y] > 0;
     }
 
     private void FindShortestRoute(Vector2Int currentTileIndex)
     {
-        var currentPoint = _mapIndexProvider.GetTilePosition(currentTileIndex - _mapsIndexDifference);
+        var currentPoint = _mapIndexProvider.GetTilePosition(currentTileIndex);
         currentPoint.y += _tileHeight;
         _shortestRoute.Push(currentPoint);
         var x = currentTileIndex.x;
         var y = currentTileIndex.y;
         
-        if (_tileMap[x, y] == 0)
+        if (_possibleRoutes[x, y] == 0)
         {
             return;
         }
         
-        _tiles[x - 1, y - 1].SetColor(true);
+        _tiles[x, y].SetColor(true);
         
-        var step = _tileMap[x, y] - 1;
+        var step = _possibleRoutes[x, y] - 1;
+
         while (step >= 0)
         {
             currentPoint = _shortestRoute.Peek(); 
-            currentTileIndex = _mapIndexProvider.GetIndex(currentPoint) + _mapsIndexDifference;
+            currentTileIndex = _mapIndexProvider.GetIndex(currentPoint);
             x = currentTileIndex.x;
             y = currentTileIndex.y;
+            
+            var wasPointAdded = false;
+            
+            if (x < _possibleRoutes.GetLength(0) - 1 && !wasPointAdded)
+            {
+                if (_possibleRoutes[x + 1, y] == step || _possibleRoutes[x + 1, y] == -10)
+                {
+                    _tiles[x + 1, y].SetColor(true);
+                    currentPoint = _mapIndexProvider.GetTilePosition(new Vector2Int(x + 1, y));
+                    currentPoint.y += _tileHeight;
+                    _shortestRoute.Push(currentPoint);
+                    wasPointAdded = true;
+                }
+            }
 
-            if (_tileMap[x, y + 1] == step || _tileMap[x, y + 1] == -10)
+            if (x > 0 && !wasPointAdded)
             {
-                _tiles[x - 1, y].SetColor(true);
-                currentPoint = _mapIndexProvider.GetTilePosition(new Vector2Int(x, y + 1) - _mapsIndexDifference);
-                currentPoint.y += _tileHeight;
-                _shortestRoute.Push(currentPoint);
-            }
-            else if (_tileMap[x, y - 1] == step || _tileMap[x, y - 1] == -10)
-            {
-                _tiles[x - 1, y - 2].SetColor(true);
-                currentPoint = _mapIndexProvider.GetTilePosition(new Vector2Int(x, y - 1) - _mapsIndexDifference);
-                currentPoint.y += _tileHeight;
-                _shortestRoute.Push(currentPoint);
+                if (_possibleRoutes[x - 1, y] == step || _possibleRoutes[x - 1, y] == -10)
+                {
+                    _tiles[x - 1, y].SetColor(true);
+                    currentPoint = _mapIndexProvider.GetTilePosition(new Vector2Int(x - 1, y));
+                    currentPoint.y += _tileHeight;
+                    _shortestRoute.Push(currentPoint);
+                    wasPointAdded = true;
+                }
             }
             
-            else if (_tileMap[x + 1, y] == step || _tileMap[x + 1, y] == -10)
+            if (y < _possibleRoutes.GetLength(1) - 1 && !wasPointAdded)
             {
-                _tiles[x, y - 1].SetColor(true);
-                currentPoint = _mapIndexProvider.GetTilePosition(new Vector2Int(x + 1, y) - _mapsIndexDifference);
-                currentPoint.y += _tileHeight;
-                _shortestRoute.Push(currentPoint);
+                if (_possibleRoutes[x, y + 1] == step || _possibleRoutes[x, y + 1] == -10)
+                {
+                    _tiles[x, y + 1].SetColor(true);
+                    currentPoint = _mapIndexProvider.GetTilePosition(new Vector2Int(x, y + 1));
+                    currentPoint.y += _tileHeight;
+                    _shortestRoute.Push(currentPoint);
+                    wasPointAdded = true;
+                }
             }
             
-            else if (_tileMap[x - 1, y] == step || _tileMap[x - 1, y] == -10)
+            if (y > 0 && !wasPointAdded)
             {
-                _tiles[x - 2, y - 1].SetColor(true);
-                currentPoint = _mapIndexProvider.GetTilePosition(new Vector2Int(x - 1, y) - _mapsIndexDifference);
-                currentPoint.y += _tileHeight;
-                _shortestRoute.Push(currentPoint);
+                if (_possibleRoutes[x, y - 1] == step || _possibleRoutes[x, y - 1] == -10)
+                {
+                    _tiles[x, y - 1].SetColor(true);
+                    currentPoint = _mapIndexProvider.GetTilePosition(new Vector2Int(x, y - 1));
+                    currentPoint.y += _tileHeight;
+                    _shortestRoute.Push(currentPoint);
+                }
             }
 
             step--;

@@ -3,13 +3,14 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
+    public bool IsObstacle { get; private set; }
+    
+    private readonly List<Material> _materials = new();
+    
     [SerializeField]
     private Color _allowingColor;
     [SerializeField]
     private Color _forbiddingColor;
-    
-    private readonly List<Material> _materials = new();
-    public bool IsObstacle { get; private set; }
 
     private void Awake()
     {
