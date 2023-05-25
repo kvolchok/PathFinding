@@ -3,9 +3,9 @@ using UnityEngine;
 public class MapBuilder : MonoBehaviour
 {
     [SerializeField] 
-    private Map _map;
-    [SerializeField] 
     private MapIndexProvider _mapIndexProvider;
+    [SerializeField] 
+    private Map _map;
 
     [SerializeField]
     private GameObject _obstacleTilePrefab;
