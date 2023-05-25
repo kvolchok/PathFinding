@@ -5,16 +5,14 @@ using UnityEngine.Events;
 
 public class PlayerController : MonoBehaviour
 {
+    public UnityEvent PlayerFinishedMoving;
+    
     private static readonly int IsMoving = Animator.StringToHash("isMoving");
 
-    public UnityEvent OnPlayerStay;
-    
     [SerializeField]
     private float _speed;
     
     private Animator _animator;
-    
-    private MapIndexProvider _mapIndexProvider;
     private Vector3 _startPoint;
 
     private void Awake()
@@ -22,12 +20,6 @@ public class PlayerController : MonoBehaviour
         _animator = GetComponent<Animator>();
     }
 
-    // По умолчанию у персонажа проигрывается анимация покоя.
-    // Для того, чтобы запустить анимацию ходьбы - передавайте в параметр аниматора IsMoving значение true:
-    // _animator.SetBool(IsMoving, true);
-    // Для того, чтобы запустить анимацию покоя - передавайте в параметр аниматора IsMoving значение false:
-    // _animator.SetBool(IsMoving, false);
-    
     public void Move(Stack<Vector3> route)
     {
         _startPoint = route.Pop();
@@ -61,6 +53,6 @@ public class PlayerController : MonoBehaviour
         }
         
         _animator.SetBool(IsMoving, false);
-        OnPlayerStay.Invoke();
+        PlayerFinishedMoving.Invoke();
     }
 }

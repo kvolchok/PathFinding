@@ -57,10 +57,10 @@ public class GameController : MonoBehaviour
         var distancesFromPlayer = _routeController.GetTilesMap();
         _player = _playerSetter.GetPlayer(distancesFromPlayer);
         
-        _player.OnPlayerStay.AddListener(highlightingTilesController.ResetAllHighlights);
-        _player.OnPlayerStay.AddListener(() => _routeController.GetTilesMap());
-        _player.OnPlayerStay.AddListener(() => _routeController.FindDistances(_player.transform.position));
-        _player.OnPlayerStay.AddListener(() => _isPlayerReadyToGo = true);
+        _player.PlayerFinishedMoving.AddListener(highlightingTilesController.ResetAllHighlights);
+        _player.PlayerFinishedMoving.AddListener(() => _routeController.GetTilesMap());
+        _player.PlayerFinishedMoving.AddListener(() => _routeController.FindDistances(_player.transform.position));
+        _player.PlayerFinishedMoving.AddListener(() => _isPlayerReadyToGo = true);
         
         _routeController.FindDistances(_player.transform.position);
         _isPlayerReadyToGo = true;
@@ -69,6 +69,6 @@ public class GameController : MonoBehaviour
     
     private void OnDisable()
     {
-        _player.OnPlayerStay.RemoveAllListeners();
+        _player.PlayerFinishedMoving.RemoveAllListeners();
     }
 }
