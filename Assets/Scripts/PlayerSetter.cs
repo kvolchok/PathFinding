@@ -34,7 +34,7 @@ public class PlayerSetter : MonoBehaviour
             }
             
             var playerSetPosition = _mapIndexProvider.GetTilePosition(randomIndex);
-            playerSetPosition.y += _tileHeight;
+            playerSetPosition.y += _map.Height;
                 
             SpawnPlayer();
             _player.transform.localPosition = playerSetPosition;

@@ -2615,6 +2615,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6787b4962e6414faaef8ab57d8647ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _mapIndexProvider: {fileID: 1592264513}
+  _map: {fileID: 1592264514}
   _tilePrefab: {fileID: 1216414579862036432, guid: 9b2a02323a097d7469ec5afb3c36ea9a, type: 3}
 --- !u!4 &1757848888
 Transform:
@@ -3517,7 +3519,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _mapIndexProvider: {fileID: 1592264513}
-  _map: {fileID: 1592264514}
   _routeController: {fileID: 1757848887}
   _playerSetter: {fileID: 464922623}
   _highlightingTilesController: {fileID: 416885839}

@@ -115,7 +115,7 @@ public class RouteController : MonoBehaviour
     public Stack<Vector3> GetShortestRoute(Vector2Int destinationTileIndex)
     {
         var currentPoint = _mapIndexProvider.GetTilePosition(destinationTileIndex);
-        currentPoint.y += _tileHeight;
+        currentPoint.y += _map.Height;
 
         var shortestRoute = new Stack<Vector3>();
         shortestRoute.Push(currentPoint);
@@ -137,7 +137,7 @@ public class RouteController : MonoBehaviour
                 if (_distancesFromStartPoint[x + 1, y] == step || _distancesFromStartPoint[x + 1, y] == -10)
                 {
                     currentPoint = _mapIndexProvider.GetTilePosition(new Vector2Int(x + 1, y));
-                    currentPoint.y += _tileHeight;
+                    currentPoint.y += _map.Height;
                     shortestRoute.Push(currentPoint);
                     wasPointAdded = true;
                 }
@@ -148,7 +148,7 @@ public class RouteController : MonoBehaviour
                 if (_distancesFromStartPoint[x - 1, y] == step || _distancesFromStartPoint[x - 1, y] == -10)
                 {
                     currentPoint = _mapIndexProvider.GetTilePosition(new Vector2Int(x - 1, y));
-                    currentPoint.y += _tileHeight;
+                    currentPoint.y += _map.Height;
                     shortestRoute.Push(currentPoint);
                     wasPointAdded = true;
                 }
@@ -159,7 +159,7 @@ public class RouteController : MonoBehaviour
                 if (_distancesFromStartPoint[x, y + 1] == step || _distancesFromStartPoint[x, y + 1] == -10)
                 {
                     currentPoint = _mapIndexProvider.GetTilePosition(new Vector2Int(x, y + 1));
-                    currentPoint.y += _tileHeight;
+                    currentPoint.y += _map.Height;
                     shortestRoute.Push(currentPoint);
                     wasPointAdded = true;
                 }
@@ -170,7 +170,7 @@ public class RouteController : MonoBehaviour
                 if (_distancesFromStartPoint[x, y - 1] == step || _distancesFromStartPoint[x, y - 1] == -10)
                 {
                     currentPoint = _mapIndexProvider.GetTilePosition(new Vector2Int(x, y - 1));
-                    currentPoint.y += _tileHeight;
+                    currentPoint.y += _map.Height;
                     shortestRoute.Push(currentPoint);
                 }
             }

@@ -3,6 +3,7 @@ using UnityEngine;
 public class Map : MonoBehaviour
 {    
     public Vector2Int Size => _size;
+    public float Height { get; private set; }
 
     [SerializeField] 
     private Vector2Int _size;
@@ -32,6 +33,11 @@ public class Map : MonoBehaviour
     public void SetTile(Vector2Int index, Tile tile)
     {
         _tiles[index.x, index.y] = tile;
+
+        if (!tile.IsObstacle)
+        {
+            Height = tile.transform.localScale.y * 2 + 0.1f;
+        }
     }
 
     public Tile[,] GetTiles()
