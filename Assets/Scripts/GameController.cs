@@ -28,6 +28,7 @@ public class GameController : MonoBehaviour
         _camera = Camera.main;
         _routeController.Initialize(_mapIndexProvider, _map);
         _playerSetter.Initialize(_mapIndexProvider, _map);
+        _highlightingTilesController.Initialize(_mapIndexProvider, _map);
     }
 
     private void Update()
@@ -46,7 +47,7 @@ public class GameController : MonoBehaviour
         }
         
         var currentTileIndex = _mapIndexProvider.GetIndex(hitInfo.point);
-        _highlightingTilesController.HighlightTile(currentTileIndex);
+        _highlightingTilesController.HighlightTile(currentTileIndex, _routeController);
 
         if (Input.GetMouseButtonDown(0) && _routeController.IsTileFree(currentTileIndex))
         {
@@ -71,8 +72,7 @@ public class GameController : MonoBehaviour
         _routeController.FindDistances(_player.transform.position);
         _isPlayerReadyToGo = true;
     }
-    
-    
+
     private void OnDisable()
     {
         _player.PlayerFinishedMoving.RemoveAllListeners();

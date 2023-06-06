@@ -3,23 +3,21 @@ using UnityEngine;
 
 public class HighlightingTilesController : MonoBehaviour
 {
-    [SerializeField]
     private MapIndexProvider _mapIndexProvider;
-    [SerializeField]
     private Map _map;
-    [SerializeField]
-    private RouteController _routeController;
 
     private Tile[,] _tiles;
     private Tile _lastHighlightedTile;
     private Tile _currentTile;
 
-    private void Awake()
+    public void Initialize(MapIndexProvider mapIndexProvider, Map map)
     {
+        _mapIndexProvider = mapIndexProvider;
+        _map = map;
         _tiles = _map.GetTiles();
     }
 
-    public void HighlightTile(Vector2Int currentTileIndex)
+    public void HighlightTile(Vector2Int currentTileIndex, RouteController routeController)
     {
         _currentTile = _tiles[currentTileIndex.x, currentTileIndex.y];
 
@@ -30,7 +28,7 @@ public class HighlightingTilesController : MonoBehaviour
 
         if (_currentTile != null)
         {
-            _currentTile.SetColor(_routeController.IsTileFree(currentTileIndex));
+            _currentTile.SetColor(routeController.IsTileFree(currentTileIndex));
         }
 
         _lastHighlightedTile = _currentTile;
