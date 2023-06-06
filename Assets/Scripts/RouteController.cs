@@ -3,29 +3,18 @@ using UnityEngine;
 
 public class RouteController : MonoBehaviour
 {
-    [SerializeField]
     private MapIndexProvider _mapIndexProvider;
-    [SerializeField]
     private Map _map;
-    
-    [SerializeField]
-    private Transform _tilePrefab;
-    
+
     private Tile[,] _tiles;
     private int[,] _distancesFromStartPoint;
 
-    private PlayerController _player;
-    private float _tileHeight;
-
-    private void Awake()
+    public void Initialize(MapIndexProvider mapIndexProvider, Map map)
     {
-        _tiles = new Tile[_map.Size.x, _map.Size.y];
+        _mapIndexProvider = mapIndexProvider;
+        _map = map;
+        
         _distancesFromStartPoint = new int[_map.Size.x, _map.Size.y];
-        _tileHeight = _tilePrefab.localScale.y * 2 + 0.1f;
-    }
-    
-    private void Start()
-    {
         for (var x = 0; x < _distancesFromStartPoint.GetLength(0); x++)
         {
             for (var y = 0; y < _distancesFromStartPoint.GetLength(1); y++)
@@ -37,13 +26,13 @@ public class RouteController : MonoBehaviour
 
     public int[,] GetTilesMap()
     {
-        _tiles = _map.GetTiles();
+        var tiles = _map.GetTiles();
 
         for (var x = 0; x < _distancesFromStartPoint.GetLength(0); x++)
         {
             for (var y = 0; y < _distancesFromStartPoint.GetLength(1); y++)
             {
-                if (!_tiles[x, y].IsObstacle)
+                if (!tiles[x, y].IsObstacle)
                 {
                     _distancesFromStartPoint[x, y] = 0;
                 }

@@ -6,6 +6,8 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private MapIndexProvider _mapIndexProvider;
     [SerializeField]
+    private Map _map;
+    [SerializeField]
     private RouteController _routeController;
     [SerializeField]
     private PlayerSetter _playerSetter;
@@ -24,6 +26,7 @@ public class GameController : MonoBehaviour
     private void Awake()
     {
         _camera = Camera.main;
+        _routeController.Initialize(_mapIndexProvider, _map);
     }
 
     private void Update()
@@ -56,8 +59,8 @@ public class GameController : MonoBehaviour
     [UsedImplicitly]
     public void StartGame()
     {
-        var distancesFromPlayer = _routeController.GetTilesMap();
-        _player = _playerSetter.GetPlayer(distancesFromPlayer);
+        var tilesMap = _routeController.GetTilesMap();
+        _player = _playerSetter.GetPlayer(tilesMap);
         
         _player.PlayerFinishedMoving.AddListener(_highlightingTilesController.ResetAllHighlights);
         _player.PlayerFinishedMoving.AddListener(() => _routeController.GetTilesMap());
