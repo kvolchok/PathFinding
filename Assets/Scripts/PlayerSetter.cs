@@ -3,50 +3,44 @@ using UnityEngine;
 public class PlayerSetter : MonoBehaviour
 {
     [SerializeField]
-    private MapIndexProvider _mapIndexProvider;
-    [SerializeField]
-    private Map _map;
-    
-    [SerializeField]
     private GameObject _playerPrefab;
-    [SerializeField]
-    private Transform _tilePrefab;
+    
+    private MapIndexProvider _mapIndexProvider;
+    private Map _map;
 
-    private float _tileHeight;
-    private PlayerController _player;
-
-    private void Awake()
+    public void Initialize(MapIndexProvider mapIndexProvider, Map map)
     {
-        _tileHeight = _tilePrefab.localScale.y * 2 + 0.1f;
+        _mapIndexProvider = mapIndexProvider;
+        _map = map;
     }
 
-    public PlayerController GetPlayer(int[,] intTileMap)
+    public PlayerController GetPlayer(int[,] tilesMap)
     {
         while (true)
         {
-            var x = Random.Range(0, intTileMap.GetLength(0));
-            var y = Random.Range(0, intTileMap.GetLength(1));
+            var x = Random.Range(0, tilesMap.GetLength(0));
+            var y = Random.Range(0, tilesMap.GetLength(1));
             var randomIndex = new Vector2Int(x, y);
 
-            if (intTileMap[x, y] == -1)
+            if (tilesMap[x, y] == -1)
             {
                 continue;
             }
             
             var playerSetPosition = _mapIndexProvider.GetTilePosition(randomIndex);
             playerSetPosition.y += _map.Height;
-                
-            SpawnPlayer();
-            _player.transform.localPosition = playerSetPosition;
-            
-            return _player;
+
+            return SpawnPlayer(playerSetPosition);
         }
     }
 
-    private void SpawnPlayer()
+    private PlayerController SpawnPlayer(Vector3 setPosition)
     {
-        var player = Instantiate(_playerPrefab);
-        _player = player.GetComponent<PlayerController>();
-        _player.transform.SetParent(_map.transform);
+        var playerObject = Instantiate(_playerPrefab);
+        var player = playerObject.GetComponent<PlayerController>();
+        player.transform.SetParent(_map.transform);
+        player.transform.localPosition = setPosition;
+
+        return player;
     }
 }

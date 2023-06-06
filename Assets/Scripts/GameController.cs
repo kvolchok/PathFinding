@@ -27,6 +27,7 @@ public class GameController : MonoBehaviour
     {
         _camera = Camera.main;
         _routeController.Initialize(_mapIndexProvider, _map);
+        _playerSetter.Initialize(_mapIndexProvider, _map);
     }
 
     private void Update()
