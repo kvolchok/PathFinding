@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 public class PlayerController : MonoBehaviour
 {
-    public UnityEvent PlayerFinishedMoving;
+    public UnityEvent OnPlayerFinishedMoving;
     
     private static readonly int IsMoving = Animator.StringToHash("isMoving");
 
@@ -52,6 +52,6 @@ public class PlayerController : MonoBehaviour
         }
         
         _animator.SetBool(IsMoving, false);
-        PlayerFinishedMoving.Invoke();
+        OnPlayerFinishedMoving.Invoke();
     }
 }

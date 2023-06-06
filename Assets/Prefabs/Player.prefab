@@ -69,7 +69,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70e0b157dbe54ed3af794e112a23db43, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerFinishedMoving:
+  OnPlayerFinishedMoving:
     m_PersistentCalls:
       m_Calls: []
   _speed: 1.5
