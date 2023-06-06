@@ -9,6 +9,8 @@ public class MapBuilder : MonoBehaviour
 
     [SerializeField]
     private GameObject _obstacleTilePrefab;
+    [SerializeField]
+    private GameObject _simpleTilePrefab;
 
     private Camera _camera;
     private Tile _currentTile;
@@ -18,23 +20,9 @@ public class MapBuilder : MonoBehaviour
         _camera = Camera.main;
     }
 
-    public void StartPlacingTile(GameObject tilePrefab)
+    private void Start()
     {
-        if (_currentTile != null)
-        {
-            Destroy(_currentTile.gameObject);
-            return;
-        }
-
-        var tileObject = Instantiate(tilePrefab);
-        _currentTile = tileObject.GetComponent<Tile>();
-        
-        if (tilePrefab == _obstacleTilePrefab)
-        {
-            _currentTile.SetAsObstacle();
-        }
-        
-        _currentTile.transform.SetParent(_map.transform);
+        BuildTileMap();
     }
 
     private void Update()
@@ -69,6 +57,55 @@ public class MapBuilder : MonoBehaviour
             _map.SetTile(tileIndex, _currentTile);
             _currentTile.ResetColor();
             _currentTile = null;
+        }
+    }
+    
+    public void StartPlacingTile(GameObject tilePrefab)
+    {
+        if (_currentTile != null)
+        {
+            Destroy(_currentTile.gameObject);
+            return;
+        }
+
+        var tileObject = Instantiate(tilePrefab);
+        _currentTile = tileObject.GetComponent<Tile>();
+        
+        if (tilePrefab == _obstacleTilePrefab)
+        {
+            _currentTile.SetAsObstacle();
+        }
+        
+        _currentTile.transform.SetParent(_map.transform);
+    }
+    
+    private void BuildTileMap()
+    {
+        for (var y = _map.Size.y - 1; y >= 0; y--)
+        {
+            for (var x = _map.Size.x - 1; x >= 0; x--)
+            {
+                var randomNumber = Random.Range(0, 10);
+                if (randomNumber >= 7)
+                {
+                    var tileObject = Instantiate(_obstacleTilePrefab);
+                    _currentTile = tileObject.GetComponent<Tile>();
+                    _currentTile.SetAsObstacle();
+                }
+                else
+                {
+                    var tileObject = Instantiate(_simpleTilePrefab);
+                    _currentTile = tileObject.GetComponent<Tile>();
+                }
+                
+                _currentTile.transform.SetParent(_map.transform);
+                var tileIndex = new Vector2Int(y, x);
+                _map.SetTile(tileIndex, _currentTile);
+                
+                var tilePosition = _mapIndexProvider.GetTilePosition(tileIndex);
+                _currentTile.transform.localPosition = tilePosition;
+                _currentTile = null;
+            }
         }
     }
 }

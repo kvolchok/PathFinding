@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
@@ -9,7 +10,7 @@ public class GameController : MonoBehaviour
     [SerializeField]
     private PlayerSetter _playerSetter;
     [SerializeField]
-    private HighlightingTilesController highlightingTilesController;
+    private HighlightingTilesController _highlightingTilesController;
 
     [SerializeField]
     private LayerMask _layer;
@@ -41,23 +42,24 @@ public class GameController : MonoBehaviour
         }
         
         var currentTileIndex = _mapIndexProvider.GetIndex(hitInfo.point);
-        highlightingTilesController.HighlightTile(currentTileIndex);
+        _highlightingTilesController.HighlightTile(currentTileIndex);
 
         if (Input.GetMouseButtonDown(0) && _routeController.IsTileFree(currentTileIndex))
         {
             var shortestRoute = _routeController.GetShortestRoute(currentTileIndex);
-            highlightingTilesController.HighlightRoute(shortestRoute);
+            _highlightingTilesController.HighlightRoute(shortestRoute);
             _player.Move(shortestRoute);
             _isPlayerReadyToGo = false;
         }
     }
 
+    [UsedImplicitly]
     public void StartGame()
     {
         var distancesFromPlayer = _routeController.GetTilesMap();
         _player = _playerSetter.GetPlayer(distancesFromPlayer);
         
-        _player.PlayerFinishedMoving.AddListener(highlightingTilesController.ResetAllHighlights);
+        _player.PlayerFinishedMoving.AddListener(_highlightingTilesController.ResetAllHighlights);
         _player.PlayerFinishedMoving.AddListener(() => _routeController.GetTilesMap());
         _player.PlayerFinishedMoving.AddListener(() => _routeController.FindDistances(_player.transform.position));
         _player.PlayerFinishedMoving.AddListener(() => _isPlayerReadyToGo = true);

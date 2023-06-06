@@ -2615,8 +2615,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6787b4962e6414faaef8ab57d8647ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _mapIndexProvider: {fileID: 1592264513}
-  _map: {fileID: 1592264514}
   _tilePrefab: {fileID: 1216414579862036432, guid: 9b2a02323a097d7469ec5afb3c36ea9a, type: 3}
 --- !u!4 &1757848888
 Transform:
@@ -2665,6 +2663,7 @@ MonoBehaviour:
   _mapIndexProvider: {fileID: 1592264513}
   _map: {fileID: 1592264514}
   _obstacleTilePrefab: {fileID: 4822957276665715105, guid: 32aa5fe9b3fd53142bd05e084fa9969d, type: 3}
+  _simpleTilePrefab: {fileID: 976523354156320879, guid: 9b2a02323a097d7469ec5afb3c36ea9a, type: 3}
 --- !u!4 &1759723805
 Transform:
   m_ObjectHideFlags: 0
@@ -3518,9 +3517,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _mapIndexProvider: {fileID: 1592264513}
+  _map: {fileID: 1592264514}
   _routeController: {fileID: 1757848887}
   _playerSetter: {fileID: 464922623}
-  highlightingTilesController: {fileID: 416885839}
+  _highlightingTilesController: {fileID: 416885839}
   _layer:
     serializedVersion: 2
     m_Bits: 8
